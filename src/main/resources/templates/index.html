@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thymeleaf Example</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+
+    <!-- Following template use object of format
+         - user { id: string, name: string, loggedIn: boolean, active: boolean }
+         - items: string[]
+         - formData: FormData containing
+            - name
+            - email
+    -->
+
+    <!-- Simple text substitution -->
+    <h1 th:text="'Welcome, ' + ${user.name}">Welcome, User</h1>
+
+    <!-- Conditional rendering -->
+    <p th:if="${user.loggedIn}">You're logged in!</p>
+    <p th:unless="${user.loggedIn}">Please log in.</p>
+
+    <!-- Iteration over list -->
+    <ul>
+        <li th:each="item, iterStat : ${items}" th:text="${iterStat.count} + '. ' + ${item}"></li>
+    </ul>
+
+    <!-- Attribute substitution -->
+    <img th:src="@{/images/logo.png}" alt="Logo"/>
+    <a th:href="@{/profile/{id}(id=${user.id})}">Profile</a>
+
+    <!-- Set element id/class dynamically -->
+    <div th:id="'user-' + ${user.id}" th:class="${user.active} ? 'active' : 'inactive'">
+        User Status
+    </div>
+
+    <!-- Inline JavaScript with Thymeleaf -->
+    <script th:inline="javascript">
+        const username = /*[[${user.name}]]*/ "default";
+        console.log("User:", username);
+    </script>
+
+    <!-- Using th:object and *{} -->
+    <form th:action="@{/submit}" th:object="${formData}" method="post">
+        <input type="text" th:field="*{name}"/>
+        <input type="email" th:field="*{email}"/>
+        <button type="submit">Submit</button>
+    </form>
+
+</body>
+</html>
