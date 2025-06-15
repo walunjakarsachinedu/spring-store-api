@@ -2,12 +2,16 @@ package com.codewithmosh.store.controllers;
 
 
 import com.codewithmosh.store.entities.Product;
+import com.codewithmosh.store.entities.dtos.CreateProductRequest;
 import com.codewithmosh.store.entities.dtos.ProductDto;
+import com.codewithmosh.store.entities.dtos.UpdateProductRequest;
 import com.codewithmosh.store.mappers.ProductMapper;
+import com.codewithmosh.store.repositories.CategoryRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -18,6 +22,7 @@ import java.util.List;
 public class ProductController {
   private ProductMapper productMapper;
   private ProductRepository productRepository;
+  private CategoryRepository categoryRepository;
 
   @GetMapping
   public List<ProductDto> getProductByCategory(@RequestParam(value = "categoryId", required = false) Byte categoryId) {
@@ -36,5 +41,48 @@ public class ProductController {
     var product = productRepository.findById(productId).orElse(null);
     if(product == null) return ResponseEntity.notFound().build();
     return ResponseEntity.ok(productMapper.toDto(product));
+  }
+
+  @PostMapping
+  public ResponseEntity<?> createProduct(
+    @RequestBody CreateProductRequest request,
+    UriComponentsBuilder uriBuilder
+  ) {
+    var category = categoryRepository.findById(request.getCategoryId()).orElse(null);
+    if(category == null) return ResponseEntity.badRequest().body("Provided category not exists, please provide existing category id");
+
+    var product = productMapper.toEntity(request);
+    product.setCategory(category);
+    productRepository.save(product);
+
+    var uri = uriBuilder.path("/products/{id}").buildAndExpand(product.getId()).toUri();
+    return ResponseEntity.created(uri).body(productMapper.toDto(product));
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<?> updateProduct(
+    @PathVariable("id") Long id,
+    @RequestBody UpdateProductRequest request
+  ) {
+    var product = productRepository.findById(id).orElse(null);
+    if(product == null) return ResponseEntity.notFound().build();
+
+    var category = categoryRepository.findById(request.getCategoryId()).orElse(null);
+    if(category == null) return ResponseEntity.badRequest().body("Provided category not exists, please provide existing category id");
+
+    productMapper.update(request, product);
+    product.setCategory(category);
+    productRepository.save(product);
+
+    return ResponseEntity.ok(productMapper.toDto(product));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
+    var product = productRepository.findById(id).orElse(null);
+    if(product == null) return ResponseEntity.notFound().build();
+
+    productRepository.deleteById(id);
+    return ResponseEntity.noContent().build();
   }
 }
