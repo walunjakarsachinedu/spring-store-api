@@ -1,7 +1,7 @@
 package com.codewithmosh.store.mappers;
 
 import com.codewithmosh.store.entities.User;
-import com.codewithmosh.store.entities.UserDto;
+import com.codewithmosh.store.entities.dtos.UserDto;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
