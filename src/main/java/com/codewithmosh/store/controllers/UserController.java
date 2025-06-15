@@ -1,5 +1,6 @@
 package com.codewithmosh.store.controllers;
 
+import com.codewithmosh.store.entities.dtos.RegisterUserRequest;
 import com.codewithmosh.store.entities.dtos.UserDto;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
@@ -7,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Set;
 
@@ -20,8 +22,10 @@ public class UserController {
 
   @GetMapping
   public ResponseEntity<?> getAllUsers(
+    @RequestHeader(value = "x-auth-token", required = false) String token,
     @RequestParam(value = "sort", required = false, defaultValue = "id") String sort
   ) {
+    System.out.println("getAllUsers(x-auth-token: " + token + ")");
     if(!Set.of("id", "name", "email").contains(sort)) {
       return ResponseEntity.badRequest().body("Invalid sort by value, provide one of id/name/email");
     }
@@ -34,11 +38,24 @@ public class UserController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<UserDto> getUser(@PathVariable("user_id") Long id) {
+  public ResponseEntity<UserDto> getUser(@PathVariable("id") Long id) {
     var user = userRepository.findById(id).orElse(null);
     if(user == null) {
       return ResponseEntity.notFound().build();
     }
     return ResponseEntity.ok(userMapper.toDto(user));
+  }
+
+  @RequestMapping(method = RequestMethod.POST)
+  public ResponseEntity<UserDto> addUser(
+    @RequestBody RegisterUserRequest request,
+    UriComponentsBuilder uriBuilder
+  ) {
+    var user = userMapper.toEntity(request);
+    userRepository.save(user);
+
+    var userDto = userMapper.toDto(user);
+    var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
+    return ResponseEntity.created(uri).body(userDto);
   }
 }
