@@ -4,11 +4,11 @@ import com.codewithmosh.store.entities.UserDto;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 
 @RestController
@@ -18,16 +18,23 @@ public class UserController {
   UserRepository userRepository;
   UserMapper userMapper;
 
-  @GetMapping("/")
-  public Iterable<UserDto> getAllUsers() {
-    return userRepository.findAll()
+  @GetMapping
+  public ResponseEntity<?> getAllUsers(
+    @RequestParam(value = "sort", required = false, defaultValue = "id") String sort
+  ) {
+    if(!Set.of("id", "name", "email").contains(sort)) {
+      return ResponseEntity.badRequest().body("Invalid sort by value, provide one of id/name/email");
+    }
+    return ResponseEntity.ok(
+      userRepository.findAll(Sort.by(sort).ascending())
       .stream()
       .map(userMapper::toDto)
-      .toList();
+      .toList()
+    );
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+  public ResponseEntity<UserDto> getUser(@PathVariable("user_id") Long id) {
     var user = userRepository.findById(id).orElse(null);
     if(user == null) {
       return ResponseEntity.notFound().build();
