@@ -14,14 +14,14 @@ import lombok.Getter;
 public class CreateUserRequest {
   @NotBlank(message = "Name is required")
   @Size(max = 255, message = "Name must be less than 255 characters")
-  public String name;
+  private String name;
 
   @NotBlank(message = "Email is required")
   @Email(message = "Email must be valid")
   @Lowercase(message = "Email must be in lowercase")
-  public String email;
+  private String email;
 
   @NotBlank(message = "Password is required")
   @Size(min = 6, max = 25, message = "Password must be between 6 to 25 characters")
-  public String password;
+  private String password;
 }
