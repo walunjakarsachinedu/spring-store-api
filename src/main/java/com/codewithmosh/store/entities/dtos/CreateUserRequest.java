@@ -1,6 +1,7 @@
 package com.codewithmosh.store.entities.dtos;
 
 
+import com.codewithmosh.store.validation.Lowercase;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -17,6 +18,7 @@ public class CreateUserRequest {
 
   @NotBlank(message = "Email is required")
   @Email(message = "Email must be valid")
+  @Lowercase(message = "Email must be in lowercase")
   public String email;
 
   @NotBlank(message = "Password is required")
