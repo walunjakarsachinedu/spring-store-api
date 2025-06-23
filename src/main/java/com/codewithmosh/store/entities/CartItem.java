@@ -1,13 +1,17 @@
 package com.codewithmosh.store.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.math.BigDecimal;
 
 
 @Getter
 @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "cart_items")
 public class CartItem {
   @Id
@@ -25,4 +29,8 @@ public class CartItem {
 
   @Column(name = "quantity")
   private Integer quantity;
+
+  public BigDecimal getTotalPrice() {
+    return BigDecimal.valueOf(quantity).multiply(product.getPrice());
+  }
 }
