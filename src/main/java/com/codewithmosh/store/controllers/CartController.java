@@ -44,41 +44,53 @@ public class CartController {
     @RequestBody AddItemToCartRequest request
   ) {
     var cart = cartRepository.findById(UUID.fromString(cartId)).orElse(null);
-    System.out.println("getting cart");
+    System.out.println("Log: getting cart");
     if (cart == null) {
       return ResponseEntity.notFound().build();
     }
 
-    System.out.println("getting product");
+    System.out.println("Log: getting product");
     var product = productRepository.findById(request.getProductId()).orElse(null);
     if (product == null) {
       return ResponseEntity.badRequest().body("Product with given id not found.");
     }
 
-    System.out.println("count of items in cart: " + cart.getItems().size());
+    System.out.println("Log: count of items in cart: " + cart.getItems().size());
     var cartItem = cart.getItems().stream()
       .filter(item -> Objects.equals(item.getProduct().getId(), product.getId()))
       .findFirst()
       .orElse(null);
 
     if (cartItem == null) {
-      System.out.println("Item not found, searching product");
+      System.out.println("Log: item not found, searching product");
       cartItem = CartItem.builder()
         .cart(cart)
         .quantity(0)
         .product(product)
         .build();
-      System.out.println("cartItem.getCart().getId(): " + cartItem.getCart().getId());
+      System.out.println("Log: cartItem.getCart().getId(): " + cartItem.getCart().getId());
       cart.getItems().add(cartItem);
-      System.out.println("Adding cart item");
+      System.out.println("Log: adding cart item");
     }
 
-    System.out.println("increasing quantity of cartItem");
+    System.out.println("Log: increasing quantity of cartItem");
     cartItem.setQuantity(cartItem.getQuantity() + 1);
 
-    System.out.println("saving cart");
+    System.out.println("Log: saving cart");
     cartRepository.save(cart);
 
+    return ResponseEntity.ok(cartMapper.toDto(cart));
+  }
+
+  @GetMapping("/{cart_id}/items")
+  public ResponseEntity<?> getCart(
+    @PathVariable("cart_id") String cartId
+  ) {
+    var cart = cartRepository.findById(UUID.fromString(cartId)).orElse(null);
+    System.out.println("Log: getting cart");
+    if (cart == null) {
+      return ResponseEntity.notFound().build();
+    }
     return ResponseEntity.ok(cartMapper.toDto(cart));
   }
 
