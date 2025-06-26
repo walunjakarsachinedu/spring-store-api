@@ -5,10 +5,11 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+
 @AllArgsConstructor
 @Getter
-public class AddItemToCartRequest {
-  @NotNull(message = "productId is required")
-  @Positive(message = "productId must be positive")
-  private Long productId;
+public class UpdateCartRequest {
+  @NotNull(message = "quantity is required")
+  @Positive(message = "quantity must be positive")
+  private Integer quantity;
 }

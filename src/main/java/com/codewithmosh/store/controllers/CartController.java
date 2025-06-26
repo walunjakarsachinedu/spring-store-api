@@ -4,13 +4,19 @@ import com.codewithmosh.store.entities.Cart;
 import com.codewithmosh.store.entities.CartItem;
 import com.codewithmosh.store.entities.dtos.AddItemToCartRequest;
 import com.codewithmosh.store.entities.dtos.CartDto;
+import com.codewithmosh.store.entities.dtos.UpdateCartRequest;
+import com.codewithmosh.store.exceptions.CartNotFoundException;
+import com.codewithmosh.store.exceptions.ProductNotFoundException;
 import com.codewithmosh.store.mappers.CartMapper;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -94,4 +100,44 @@ public class CartController {
     return ResponseEntity.ok(cartMapper.toDto(cart));
   }
 
+  @PutMapping("/{cartId}/items/{productId}")
+  public CartDto updateItem(
+    @PathVariable("cartId") String cartId,
+    @PathVariable("productId") Long productId,
+    @Valid @RequestBody UpdateCartRequest request
+    ) {
+    var cart = cartRepository.findById(UUID.fromString(cartId)).orElse(null);
+    System.out.println("Log: getting cart");
+    if (cart == null) {
+      throw new CartNotFoundException();
+    }
+
+    var item = cart
+      .getItems()
+      .stream()
+      .filter(el -> Objects.equals(el.getProduct().getId(), productId))
+      .findFirst().orElse(null);
+
+    if(item == null) {
+      throw new ProductNotFoundException();
+    }
+
+    System.out.println("Log: setting product quantity");
+    item.setQuantity(request.getQuantity());
+
+    System.out.println("Log: saving cart");
+    cartRepository.save(cart);
+
+    return cartMapper.toDto(cart);
+  }
+
+  @ExceptionHandler(ProductNotFoundException.class)
+  public ResponseEntity<?> productNotFoundHandler() {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Product not found."));
+  }
+
+  @ExceptionHandler(CartNotFoundException.class)
+  public ResponseEntity<?> cartNotFoundHandler() {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Cart not found."));
+  }
 }
