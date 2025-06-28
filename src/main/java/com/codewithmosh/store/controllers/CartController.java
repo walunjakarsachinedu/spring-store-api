@@ -1,8 +1,6 @@
 package com.codewithmosh.store.controllers;
 
 import com.codewithmosh.store.entities.Cart;
-import com.codewithmosh.store.entities.CartItem;
-import com.codewithmosh.store.entities.dtos.AddItemToCartRequest;
 import com.codewithmosh.store.entities.dtos.CartDto;
 import com.codewithmosh.store.entities.dtos.UpdateCartRequest;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
@@ -44,49 +42,6 @@ public class CartController {
     return cartMapper.toDto(cart);
   }
 
-  @PostMapping("/{cart_id}/items")
-  public ResponseEntity<?> addToCart(
-    @PathVariable("cart_id") String cartId,
-    @RequestBody AddItemToCartRequest request
-  ) {
-    var cart = cartRepository.findById(UUID.fromString(cartId)).orElse(null);
-    System.out.println("Log: getting cart");
-    if (cart == null) {
-      return ResponseEntity.notFound().build();
-    }
-
-    System.out.println("Log: getting product");
-    var product = productRepository.findById(request.getProductId()).orElse(null);
-    if (product == null) {
-      return ResponseEntity.badRequest().body("Product with given id not found.");
-    }
-
-    System.out.println("Log: count of items in cart: " + cart.getItems().size());
-    var cartItem = cart.getItems().stream()
-      .filter(item -> Objects.equals(item.getProduct().getId(), product.getId()))
-      .findFirst()
-      .orElse(null);
-
-    if (cartItem == null) {
-      System.out.println("Log: item not found, searching product");
-      cartItem = CartItem.builder()
-        .cart(cart)
-        .quantity(0)
-        .product(product)
-        .build();
-      System.out.println("Log: cartItem.getCart().getId(): " + cartItem.getCart().getId());
-      cart.getItems().add(cartItem);
-      System.out.println("Log: adding cart item");
-    }
-
-    System.out.println("Log: increasing quantity of cartItem");
-    cartItem.setQuantity(cartItem.getQuantity() + 1);
-
-    System.out.println("Log: saving cart");
-    cartRepository.save(cart);
-
-    return ResponseEntity.ok(cartMapper.toDto(cart));
-  }
 
   @GetMapping("/{cart_id}/items")
   public ResponseEntity<?> getCart(
@@ -131,13 +86,48 @@ public class CartController {
     return cartMapper.toDto(cart);
   }
 
-  @ExceptionHandler(ProductNotFoundException.class)
-  public ResponseEntity<?> productNotFoundHandler() {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Product not found."));
+
+  @DeleteMapping("/{cartId}/items/{productId}")
+  public ResponseEntity<?> removeItem(
+    @PathVariable("cartId") String cartId,
+    @PathVariable("productId") Long productId
+  ) {
+    var cart = cartRepository.findById(UUID.fromString(cartId)).orElse(null);
+    System.out.println("Log: getting cart");
+    if (cart == null) {
+      throw new CartNotFoundException();
+    }
+
+    var item = cart
+      .getItems()
+      .stream()
+      .filter(el -> Objects.equals(el.getProduct().getId(), productId))
+      .findFirst().orElse(null);
+
+    if(item == null) {
+      System.out.println("Log: throwing product not found exception");
+      throw new ProductNotFoundException();
+    }
+    System.out.println("Log: product found");
+
+    System.out.println("Log: removing item");
+    System.out.println("Log: total item [before removal]: " + cart.getItems().size());
+    cart.getItems().remove(item);
+    item.setCart(null);
+    System.out.println("Log: total item [after removal]: " + cart.getItems().size());
+
+    cartRepository.save(cart);
+
+    return ResponseEntity.ok().build();
   }
 
   @ExceptionHandler(CartNotFoundException.class)
   public ResponseEntity<?> cartNotFoundHandler() {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Cart not found."));
+  }
+
+  @ExceptionHandler(ProductNotFoundException.class)
+  public ResponseEntity<?> productNotFoundHandler() {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Product not found."));
   }
 }
