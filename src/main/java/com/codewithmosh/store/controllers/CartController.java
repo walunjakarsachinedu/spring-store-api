@@ -121,6 +121,19 @@ public class CartController {
     return ResponseEntity.ok().build();
   }
 
+  @DeleteMapping("/{cardId}/items")
+  ResponseEntity<?> clearCart(
+    @PathVariable("cardId") String cartId
+  ) {
+    var cart = cartRepository.findById(UUID.fromString(cartId)).orElse(null);
+    if(cart == null) throw new CartNotFoundException();
+
+    cart.getItems().clear();
+    cartRepository.save(cart);
+
+    return ResponseEntity.noContent().build();
+  }
+
   @ExceptionHandler(CartNotFoundException.class)
   public ResponseEntity<?> cartNotFoundHandler() {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Cart not found."));
