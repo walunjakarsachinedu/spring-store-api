@@ -1,9 +1,9 @@
 package com.codewithmosh.store.mappers;
 
 import com.codewithmosh.store.entities.User;
-import com.codewithmosh.store.entities.dtos.CreateUserRequest;
-import com.codewithmosh.store.entities.dtos.UpdateUserRequest;
-import com.codewithmosh.store.entities.dtos.UserDto;
+import com.codewithmosh.store.dtos.CreateUserRequest;
+import com.codewithmosh.store.dtos.UpdateUserRequest;
+import com.codewithmosh.store.dtos.UserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 

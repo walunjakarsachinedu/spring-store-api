@@ -1,9 +1,9 @@
 package com.codewithmosh.store.controllers;
 
-import com.codewithmosh.store.entities.dtos.ChangePasswordRequest;
-import com.codewithmosh.store.entities.dtos.CreateUserRequest;
-import com.codewithmosh.store.entities.dtos.UpdateUserRequest;
-import com.codewithmosh.store.entities.dtos.UserDto;
+import com.codewithmosh.store.dtos.ChangePasswordRequest;
+import com.codewithmosh.store.dtos.CreateUserRequest;
+import com.codewithmosh.store.dtos.UpdateUserRequest;
+import com.codewithmosh.store.dtos.UserDto;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import jakarta.validation.Valid;

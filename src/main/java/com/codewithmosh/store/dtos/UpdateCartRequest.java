@@ -1,4 +1,4 @@
-package com.codewithmosh.store.entities.dtos;
+package com.codewithmosh.store.dtos;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

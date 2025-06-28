@@ -2,9 +2,9 @@ package com.codewithmosh.store.controllers;
 
 
 import com.codewithmosh.store.entities.Product;
-import com.codewithmosh.store.entities.dtos.CreateProductRequest;
-import com.codewithmosh.store.entities.dtos.ProductDto;
-import com.codewithmosh.store.entities.dtos.UpdateProductRequest;
+import com.codewithmosh.store.dtos.CreateProductRequest;
+import com.codewithmosh.store.dtos.ProductDto;
+import com.codewithmosh.store.dtos.UpdateProductRequest;
 import com.codewithmosh.store.mappers.ProductMapper;
 import com.codewithmosh.store.repositories.CategoryRepository;
 import com.codewithmosh.store.repositories.ProductRepository;

@@ -1,4 +1,4 @@
-package com.codewithmosh.store.entities.dtos;
+package com.codewithmosh.store.dtos;
 
 
 import com.codewithmosh.store.validation.Lowercase;

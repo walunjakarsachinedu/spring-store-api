@@ -1,8 +1,8 @@
 package com.codewithmosh.store.controllers;
 
 import com.codewithmosh.store.entities.Cart;
-import com.codewithmosh.store.entities.dtos.CartDto;
-import com.codewithmosh.store.entities.dtos.UpdateCartRequest;
+import com.codewithmosh.store.dtos.CartDto;
+import com.codewithmosh.store.dtos.UpdateCartRequest;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.exceptions.ProductNotFoundException;
 import com.codewithmosh.store.mappers.CartMapper;
