@@ -11,7 +11,6 @@ import com.codewithmosh.store.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -42,12 +41,7 @@ public class CartService {
 
   public Cart addItem(String cartId, Long productId) {
     var cart = getCartById(cartId);
-
-    var cartItem = cart.getItems()
-      .stream()
-      .filter(el -> el.getProduct().getId().equals(productId))
-      .findFirst()
-      .orElse(null);
+    var cartItem = cart.getCartItem(productId);
 
     if(cartItem != null) {
       cartItem.setQuantity(cartItem.getQuantity()+1);
@@ -70,12 +64,7 @@ public class CartService {
 
   public Cart updateCartQuantity(String cartId, Long productId, Integer quantity) {
     var cart = getCartById(cartId);
-
-    var item = cart
-      .getItems()
-      .stream()
-      .filter(el -> Objects.equals(el.getProduct().getId(), productId))
-      .findFirst().orElse(null);
+    var item = cart.getCartItem(productId);
 
     if(item == null) throw new ProductNotFoundException();
 
@@ -90,20 +79,12 @@ public class CartService {
 
   public void removeItem(String cartId, Long productId) {
     var cart = getCartById(cartId);
-
-    var item = cart
-      .getItems()
-      .stream()
-      .filter(el -> Objects.equals(el.getProduct().getId(), productId))
-      .findFirst().orElse(null);
+    var item = cart.getCartItem(productId);
 
     if(item == null) throw new ProductNotFoundException();
 
-    System.out.println("Log: removing item");
-    System.out.println("Log: total item [before removal]: " + cart.getItems().size());
     cart.getItems().remove(item);
     item.setCart(null);
-    System.out.println("Log: total item [after removal]: " + cart.getItems().size());
 
     cartRepository.save(cart);
   }
