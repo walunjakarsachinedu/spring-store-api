@@ -43,19 +43,19 @@ public class CartService {
     var cart = getCartById(cartId);
     var cartItem = cart.getCartItem(productId);
 
-    if(cartItem != null) {
-      cartItem.setQuantity(cartItem.getQuantity()+1);
-    }
-    else {
+    if(cartItem == null) {
       var product = getProductById(productId);
-      cart.getItems().add(
-        CartItem.builder()
+      cartItem = CartItem.builder()
           .product(product)
           .cart(cart)
           .quantity(0)
-          .build()
+          .build();
+      cart.getItems().add(
+        cartItem
       );
     }
+
+    cartItem.setQuantity(cartItem.getQuantity()+1);
 
     cartRepository.save(cart);
 
