@@ -8,4 +8,4 @@ spring:
   jpa:
     show-sql: true
   jwt:
-    secret: ZjNiZWx3Z2FuZHpwcnhycWQ5bGE3dThtdjRyNzBreG11b202cWx4ZGFpMTFmc3hmOGEybW5vN2F2eXo1a2VnbzdzODc0djhzbnl6NjNrNm1wMnl1aXE4YmVlbG95cWNyaGpsMXdvYzhlMjZ3eGF0a3l1enoxaWtraXRiN3loeTA=
+    secret: ${JWT_SECRET}
