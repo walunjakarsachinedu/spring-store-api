@@ -27,7 +27,7 @@ public class CartController {
   CartMapper cartMapper;
   CartService cartService;
 
-  @PostMapping("/")
+  @PostMapping(path = {"", "/"})
   public CartDto createCart() {
     var cart = cartService.createCart();
     return cartMapper.toDto(cart);
