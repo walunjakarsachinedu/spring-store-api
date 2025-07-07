@@ -5,6 +5,8 @@ import com.codewithmosh.store.dtos.LoginRequest;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import com.codewithmosh.store.services.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,7 +30,10 @@ public class AuthController {
   private final UserMapper userMapper;
 
   @PostMapping("/login")
-  public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+  public ResponseEntity<JwtResponse> login(
+    @Valid @RequestBody LoginRequest loginRequest,
+    HttpServletResponse response
+  ) {
     authenticationManager.authenticate(
       new UsernamePasswordAuthenticationToken(
         loginRequest.getEmail(),
@@ -36,10 +41,20 @@ public class AuthController {
       )
     );
 
-    var user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    var user = userRepository.findByEmail(loginRequest.getEmail())
+      .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    var refreshToken = jwtService.generateRefreshToken(user);
+
+    var cookie = new Cookie("refreshToken", refreshToken);
+    cookie.setPath("/auth/refresh");
+    cookie.setMaxAge(7 * 86400); // ~ 7 days
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    response.addCookie(cookie);
 
     return ResponseEntity.ok(
-      new JwtResponse(jwtService.generateToken(user))
+      new JwtResponse(jwtService.generateAccessToken(user))
     );
   }
 
