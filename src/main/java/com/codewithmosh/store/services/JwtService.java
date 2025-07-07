@@ -1,5 +1,6 @@
 package com.codewithmosh.store.services;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,7 +17,6 @@ public class JwtService {
 
   public String generateToken(String email) {
     var tokenExpirationInSec = 86400; // ~ 1 day
-    System.out.println("Using secret : " + secret);
     return Jwts.builder()
       .subject(email)
       .issuedAt(new Date())
@@ -27,16 +27,22 @@ public class JwtService {
 
   public boolean validateToken(String token) {
     try {
-      var claims = Jwts.parser()
-        .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
-        .build()
-        .parseSignedClaims(token)
-        .getPayload();
-
-      return claims.getExpiration().after(new Date());
+      return getClaims(token).getExpiration().after(new Date());
     }
     catch (JwtException exp) {
       return false;
     }
+  }
+
+  public String getEmailFromToken(String token) {
+    return getClaims(token).getSubject();
+  }
+
+  private Claims getClaims(String token) {
+    return Jwts.parser()
+      .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+      .build()
+      .parseSignedClaims(token)
+      .getPayload();
   }
 }
