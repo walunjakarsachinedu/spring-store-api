@@ -1,5 +1,6 @@
 package com.codewithmosh.store.controllers;
 
+import com.codewithmosh.store.config.JwtConfig;
 import com.codewithmosh.store.dtos.JwtResponse;
 import com.codewithmosh.store.dtos.LoginRequest;
 import com.codewithmosh.store.mappers.UserMapper;
@@ -28,6 +29,7 @@ public class AuthController {
   private final AuthenticationManager authenticationManager;
   private final JwtService jwtService;
   private final UserMapper userMapper;
+  private final JwtConfig jwtConfig;
 
   @PostMapping("/login")
   public ResponseEntity<JwtResponse> login(
@@ -48,7 +50,7 @@ public class AuthController {
 
     var cookie = new Cookie("refreshToken", refreshToken);
     cookie.setPath("/auth/refresh");
-    cookie.setMaxAge(7 * 86400); // ~ 7 days
+    cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());
     cookie.setHttpOnly(true);
     cookie.setSecure(true);
     response.addCookie(cookie);
