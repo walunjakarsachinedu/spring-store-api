@@ -17,14 +17,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-  private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
   private final AuthenticationManager authenticationManager;
   private final JwtService jwtService;
@@ -58,6 +56,21 @@ public class AuthController {
     return ResponseEntity.ok(
       new JwtResponse(jwtService.generateAccessToken(user))
     );
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<JwtResponse> refresh(
+    @CookieValue("refreshToken") String refreshToken
+  ) {
+    if(!jwtService.validateToken(refreshToken)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    var userId = jwtService.getUserIdFromToken(refreshToken);
+    var user = userRepository.findById(userId).orElseThrow();
+    var accessToken = jwtService.generateAccessToken(user);
+
+    return ResponseEntity.ok(new JwtResponse(accessToken));
   }
 
   @GetMapping("/me")
