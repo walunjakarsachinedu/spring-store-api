@@ -21,6 +21,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtService jwtService;
 
+
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     var authHeader = request.getHeader("Authorization");
@@ -30,17 +31,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     var token = authHeader.replace("Bearer ", "");
-    if(!jwtService.validateToken(token)) {
+    var jwt = jwtService.parseToken(token);
+    if(jwt.isExpired()) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    var userId = jwtService.getUserIdFromToken(token);
-    var userRole = jwtService.getRoleFromToken(token);
     var authentication = new UsernamePasswordAuthenticationToken(
-      userId,
+      jwt.getUserId(),
       null,
-      List.of(new SimpleGrantedAuthority("ROLE_" + userRole))
+      List.of(new SimpleGrantedAuthority("ROLE_" + jwt.getRole()))
     );
 
     // attach request details (like IP address, session ID)

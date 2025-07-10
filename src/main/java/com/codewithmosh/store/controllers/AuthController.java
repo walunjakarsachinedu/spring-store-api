@@ -43,10 +43,12 @@ public class AuthController {
 
     var user = userRepository.findByEmail(loginRequest.getEmail())
       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    System.out.println("fetching user from database");
 
+    var accessToken = jwtService.generateRefreshToken(user);
     var refreshToken = jwtService.generateRefreshToken(user);
 
-    var cookie = new Cookie("refreshToken", refreshToken);
+    var cookie = new Cookie("refreshToken", refreshToken.toString());
     cookie.setPath("/auth/refresh");
     cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());
     cookie.setHttpOnly(true);
@@ -54,7 +56,7 @@ public class AuthController {
     response.addCookie(cookie);
 
     return ResponseEntity.ok(
-      new JwtResponse(jwtService.generateAccessToken(user))
+      new JwtResponse(accessToken.toString())
     );
   }
 
@@ -62,15 +64,16 @@ public class AuthController {
   public ResponseEntity<JwtResponse> refresh(
     @CookieValue("refreshToken") String refreshToken
   ) {
-    if(!jwtService.validateToken(refreshToken)) {
+    var jwt = jwtService.parseToken(refreshToken);
+    if(jwt == null || jwt.isExpired()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    var userId = jwtService.getUserIdFromToken(refreshToken);
+    var userId = jwt.getUserId();
     var user = userRepository.findById(userId).orElseThrow();
     var accessToken = jwtService.generateAccessToken(user);
 
-    return ResponseEntity.ok(new JwtResponse(accessToken));
+    return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
   }
 
   @GetMapping("/me")
@@ -82,12 +85,6 @@ public class AuthController {
 
     var userDto = userMapper.toDto(user);
     return ResponseEntity.ok(userDto);
-  }
-
-  @PostMapping("/validate")
-  public boolean validate(@RequestHeader("Authorization") String authHeader) {
-    var token = authHeader.replace("Bearer ", "");
-    return jwtService.validateToken(token);
   }
 
   @ExceptionHandler(BadCredentialsException.class)
