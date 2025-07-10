@@ -1,6 +1,8 @@
 package com.codewithmosh.store.config;
 
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.filters.JwtAuthenticationFilter;
+import com.codewithmosh.store.filters.LoggingFilter;
 import com.codewithmosh.store.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
   final private UserService userService;
   final private JwtAuthenticationFilter jwtAuthenticationFilter;
+  final private LoggingFilter loggingFilter;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -56,19 +59,27 @@ public class SecurityConfig {
       .sessionManagement(c ->
         c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .csrf(AbstractHttpConfigurer::disable)
-      .authorizeHttpRequests(c ->
-        c
-          .requestMatchers("/carts/**").permitAll()
-          .requestMatchers(HttpMethod.POST, "/users").permitAll()
-          .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-          .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-          .anyRequest().authenticated()
+      .authorizeHttpRequests(c -> {
+          c
+            .requestMatchers("/carts/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/users").permitAll()
+            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+            .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+            .requestMatchers(HttpMethod.GET, "/admin/hello").hasRole(Role.ADMIN.name())
+            .anyRequest().authenticated();
+        }
       )
      .exceptionHandling(c -> c
        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-       .accessDeniedHandler((req, res, ex) -> res.sendError(HttpStatus.FORBIDDEN.value()))
+       .accessDeniedHandler((req, res, ex) -> {
+         res.setStatus(403);
+         res.setContentType("application/json");
+         res.getWriter().write("{\"error\": \"Forbidden\"}");
+         res.getWriter().flush();
+       })
      )
      .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+     .addFilterBefore(loggingFilter, JwtAuthenticationFilter.class)
      .build();
   }
 }
