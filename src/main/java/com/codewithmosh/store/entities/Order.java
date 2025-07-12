@@ -36,18 +36,21 @@ public class Order {
   @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
   private Set<OrderItem> items = new LinkedHashSet<>();
 
+  public boolean isOwnByUser(User user) {
+    return getCustomer().getId().equals(user.getId());
+  }
 
   static public Order from(Cart cart, User user) {
     var order = new Order();
     order.setStatus(OrderStatus.PENDING);
     order.setCustomer(user);
+    order.setTotalPrice(cart.getTotalPrice());
     order.setItems(cart
       .getItems()
       .stream()
       .map(v -> OrderItem.from(v, order))
       .collect(Collectors.toSet())
     );
-
     return order;
   }
 }
