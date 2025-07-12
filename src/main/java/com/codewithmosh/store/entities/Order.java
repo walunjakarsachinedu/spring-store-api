@@ -1,13 +1,13 @@
 package com.codewithmosh.store.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -19,20 +19,35 @@ public class Order {
   @Column(name="id")
   private Long id;
 
-  @Column(name="customer_id")
+  @JoinColumn(name="customer_id")
   @ManyToOne
   private User customer;
 
   @Column(name="status")
   @Enumerated(EnumType.STRING)
-  private OrderStatus status;
+  private OrderStatus status = OrderStatus.PENDING;
 
   @Column(name="created_at", insertable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @Column(name="total_price")
-  private BigDecimal totalPrice;
+  private BigDecimal totalPrice = BigDecimal.ZERO;
 
-  @OneToMany(mappedBy = "order")
+  @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
   private Set<OrderItem> items = new LinkedHashSet<>();
+
+
+  static public Order from(Cart cart, User user) {
+    var order = new Order();
+    order.setStatus(OrderStatus.PENDING);
+    order.setCustomer(user);
+    order.setItems(cart
+      .getItems()
+      .stream()
+      .map(v -> OrderItem.from(v, order))
+      .collect(Collectors.toSet())
+    );
+
+    return order;
+  }
 }

@@ -42,4 +42,12 @@ public class Cart {
       .findFirst()
       .orElse(null);
   }
+
+  public boolean isEmpty() {
+    return getItems().isEmpty();
+  }
+
+  public void clearCart() {
+    this.items.clear();
+  }
 }
