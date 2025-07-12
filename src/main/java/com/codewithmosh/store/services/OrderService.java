@@ -7,6 +7,8 @@ import com.codewithmosh.store.repositories.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class OrderService {
@@ -21,5 +23,10 @@ public class OrderService {
     }
 
     return order;
+  }
+
+  public List<Order> getAllOrders() {
+    var customerId = authService.getUser().getId();
+    return orderRepository.findByCustomer(customerId);
   }
 }
