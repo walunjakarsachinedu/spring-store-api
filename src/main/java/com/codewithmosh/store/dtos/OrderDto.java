@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -12,6 +13,7 @@ import java.util.Set;
 public class OrderDto {
   private final Long id;
   private final OrderStatus status;
+  private LocalDateTime createdAt;
   private final BigDecimal totalPrice;
   private final Set<OrderItemDto> items;
 }

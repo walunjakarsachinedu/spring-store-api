@@ -6,8 +6,6 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
 @Setter
 @Entity
@@ -35,14 +33,11 @@ public class OrderItem {
   @Column(name="total_price")
   private BigDecimal totalPrice;
 
-
-  static public OrderItem from(CartItem cartItem, Order order) {
-    return OrderItem.builder()
-      .order(order)
-      .product(cartItem.getProduct())
-      .unitPrice(cartItem.getProduct().getPrice())
-      .quantity(cartItem.getQuantity())
-      .totalPrice(cartItem.getTotalPrice())
-      .build();
+  public OrderItem(Order order, Product product, Integer quantity) {
+    this.order = order;
+    this.product = product;
+    this.quantity = quantity;
+    this.unitPrice = product.getPrice();
+    this.totalPrice = this.unitPrice.multiply(BigDecimal.valueOf(quantity));
   }
 }

@@ -45,12 +45,9 @@ public class Order {
     order.setStatus(OrderStatus.PENDING);
     order.setCustomer(user);
     order.setTotalPrice(cart.getTotalPrice());
-    order.setItems(cart
-      .getItems()
-      .stream()
-      .map(v -> OrderItem.from(v, order))
-      .collect(Collectors.toSet())
-    );
+    cart.getItems().forEach(item -> {
+      order.items.add(new OrderItem(order, item.getProduct(), item.getQuantity() ));
+    });
     return order;
   }
 }
