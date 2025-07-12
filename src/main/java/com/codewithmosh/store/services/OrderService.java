@@ -16,7 +16,7 @@ public class OrderService {
   private final AuthService authService;
 
   public Order getOrder(Long orderId) {
-    var order = orderRepository.findById(orderId).orElseThrow(OrderNotFoundException::new);
+    var order = orderRepository.getOrderWithItems(orderId).orElseThrow(OrderNotFoundException::new);
 
     if(!order.isOwnByUser(authService.getUser())) {
       throw new OrderAccessDeniedException();
@@ -27,6 +27,6 @@ public class OrderService {
 
   public List<Order> getAllOrders() {
     var customerId = authService.getUser().getId();
-    return orderRepository.findByCustomer(customerId);
+    return orderRepository.getAllByCustomer(customerId);
   }
 }
