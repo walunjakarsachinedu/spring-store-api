@@ -3,6 +3,7 @@ package com.codewithmosh.store.services;
 import com.codewithmosh.store.dtos.CheckoutRequest;
 import com.codewithmosh.store.dtos.CheckoutResponse;
 import com.codewithmosh.store.entities.Order;
+import com.codewithmosh.store.entities.OrderStatus;
 import com.codewithmosh.store.exceptions.CartEmptyException;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.repositories.CartRepository;
@@ -10,6 +11,8 @@ import com.codewithmosh.store.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -43,5 +46,15 @@ public class CheckoutService {
       orderRepository.delete(order);
       throw ex;
     }
+  }
+
+
+  public void handleWebhookRequest(Map<String, String> headers, String payload) {
+    paymentGateway.parseWebhookResponse(new WebhookRequest(headers, payload))
+      .ifPresent((response) -> {
+        var order = orderRepository.findById(response.orderId()).orElseThrow();
+        order.setStatus(OrderStatus.PAID);
+        orderRepository.save(order);
+      });
   }
 }

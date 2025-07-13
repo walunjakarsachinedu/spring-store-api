@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/checkout")
@@ -24,6 +26,13 @@ public class CheckoutController {
       return ResponseEntity.ok().body(checkoutResponse);
   }
 
+  @PostMapping("/webhook")
+  public void checkoutWebhook(
+    @RequestHeader Map<String, String> headers,
+    @RequestBody String payload
+    ) {
+    checkoutService.handleWebhookRequest(headers, payload);
+  }
 
   @ExceptionHandler(PaymentException.class)
   public ResponseEntity<?> paymentExceptionHandler(Exception exp) {
