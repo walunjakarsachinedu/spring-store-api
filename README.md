@@ -1,19 +1,49 @@
-# The Ultimate Spring Boot Course
+# Spring Store API
 
-This repository contains the starter project for Part 2 of my Spring Boot course:
+A Spring Boot REST API built while following the *Spring Boot: Mastering REST API Development* course by Mosh Hamedani.
 
-[https://codewithmosh.com/p/spring-boot-building-apis](https://codewithmosh.com/p/spring-boot-building-apis)
+## Features
 
-## About this Repository 
+- RESTful API design with Spring Boot
+- CRUD operations for Products, Categories, Users
+- Data validation using Spring Validation
+- Global exception handling
+- DTO mapping with MapStruct
+- Persistence using Spring Data JPA
+- Custom middleware for logging
+- Secure endpoints with Spring Security & JWT
+- Swagger (OpenAPI) documentation
+- Role-based access control (Admin/User)
 
-This project is based on the final project from Part 1 of the course, but I’ve cleaned it up and removed unnecessary playground code so we can focus on building APIs in Part 2.
 
-You’ll be cloning this repository and coding along with me as we extend the project.
+## Tech Stack
 
-To get started, clone the repository to your local machine:
+- Java 17+
+- Spring Boot 3+
+- Spring Security, JPA, Validation
+- MapStruct
+- MySQL
+- JWT
+- Swagger
 
-```sh
-git clone https://github.com/mosh-hamedani/spring-api-starter
+## Running the App
 
-cd spring-api
+```bash
+./mvnw spring-boot:run
 ```
+
+Or use your IDE to run SpringStoreApiApplication.
+
+
+## API Documentation
+
+Swagger UI is available at:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+## Notes
+
+For detailed implementation notes and explanations, refer to my course notes [here](https://lumbar-clownfish-4a1.notion.site/springboot-9b78b306ca18426182acbf310dc04d27?source=copy_link).
+
