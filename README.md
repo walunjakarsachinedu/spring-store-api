@@ -34,6 +34,17 @@ A Spring Boot REST API built while following the *Spring Boot: Mastering REST AP
 
 Or use your IDE to run SpringStoreApiApplication.
 
+## Code Organisation
+
+This project uses a feature-first approach to package organization:
+
+> Organize by feature first, then by layer—only when a layer has multiple elements.
+> 
+> e.g., For example, in the auth feature, multiple DTOs (like LoginRequest, JwtResponse) are grouped under:
+> ```java
+> package com.codewithmosh.store.auth.dtos;
+> ```
+
 
 ## API Documentation
 

@@ -67,6 +67,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/error").permitAll()
             .requestMatchers(HttpMethod.GET, "/admin/hello").hasRole(Role.ADMIN.name())
             .requestMatchers(HttpMethod.POST, "/checkout/webhook").permitAll()
+            .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
             .anyRequest().authenticated();
         }
       )
