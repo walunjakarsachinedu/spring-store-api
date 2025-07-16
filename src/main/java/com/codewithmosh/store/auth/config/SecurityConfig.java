@@ -1,13 +1,12 @@
 package com.codewithmosh.store.auth.config;
 
-import com.codewithmosh.store.auth.entities.Role;
 import com.codewithmosh.store.auth.JwtAuthenticationFilter;
 import com.codewithmosh.store.common.LoggingFilter;
+import com.codewithmosh.store.common.SecurityRules;
 import com.codewithmosh.store.users.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,6 +22,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Configuration // mark class as bean
 @EnableWebSecurity
@@ -30,6 +31,7 @@ public class SecurityConfig {
   final private UserService userService;
   final private JwtAuthenticationFilter jwtAuthenticationFilter;
   final private LoggingFilter loggingFilter;
+  final private List<SecurityRules> securityRules;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -51,26 +53,15 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    // tell:
-    // use stateless session
-    // disable CSRF
-    // authorize (which endpoint are public or private)
-   return http
+    http
       .sessionManagement(c ->
         c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .csrf(AbstractHttpConfigurer::disable)
-      .authorizeHttpRequests(c -> {
-          c
-            .requestMatchers(HttpMethod.POST, "/users").permitAll()
-            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-            .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-            .requestMatchers(HttpMethod.GET, "/error").permitAll()
-            .requestMatchers(HttpMethod.GET, "/admin/hello").hasRole(Role.ADMIN.name())
-            .requestMatchers(HttpMethod.POST, "/checkout/webhook").permitAll()
-            .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .anyRequest().authenticated();
-        }
-      )
+      .csrf(AbstractHttpConfigurer::disable);
+
+    http.authorizeHttpRequests(c -> securityRules.forEach(rule -> rule.configure(c)));
+
+   return http
+      .authorizeHttpRequests(c -> c.anyRequest().authenticated())
      .exceptionHandling(c -> c
        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
        .accessDeniedHandler((req, res, ex) -> {
